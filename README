@@ -1,0 +1,9 @@
+Under development.
+
+Whats currently working:
+
+- set / get client_id
+- list buckets
+- ping
+- get server info
+- get bucket props

@@ -31,18 +31,6 @@ class Net::RiakPB {
         );
     }
 
-    method delete_key (Str $bucket, Str $key) {
-        my $response = $self->send_message(
-            DelReq => {
-                bucket => $bucket,
-                key => $key,
-                rw => $self->w
-            }
-        );
-
-        return $response;
-    }
-
     method all_buckets {
         my $resp = $self->send_message('ListBucketsReq');
         return $resp->buckets;
