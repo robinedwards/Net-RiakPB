@@ -1,9 +1,15 @@
-Under development.
-
-Whats currently working:
-
+WORKING
 - set / get client_id
 - list buckets
 - ping
 - get server info
 - get bucket props
+- set bucket props
+- get object
+- set object
+- list keys
+
+TODO
+- map / reduce
+- vclock
+- content type / encodings / charset
