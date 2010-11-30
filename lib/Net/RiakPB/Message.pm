@@ -63,12 +63,27 @@ class Net::RiakPB::Message {
     }
 
     # inflate to error response class
-    method send {
+    method send (CodeRef $cb?) {
         die "No socket? did you forget to ->connect?"
             unless $self->has_socket;
 
         $self->socket->print($self->request);
+        
+        my $resp = $self->handle_response;
 
+        return $resp unless ($cb);
+
+        # multiple responses
+        $cb->($resp);
+        while (!$resp->done) {
+            $resp = $self->handle_response;
+            $cb->($resp); 
+        }
+
+        return 1;
+    }
+
+    method handle_response {
         my ($code, $resp) = $self->_unpack_response;
 
         my $expected_code = EXPECTED_RESP($self->request_code);

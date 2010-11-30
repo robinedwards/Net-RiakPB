@@ -59,7 +59,7 @@ class Net::RiakPB::Object {
             unless defined $resp->content;
 
         $self->content(
-            $content->decode($resp->content)
+            $content->decode($resp->content->[0])
         );
 
         return $self;
@@ -74,5 +74,15 @@ class Net::RiakPB::Object {
         );
 
         return $self;
+    }
+
+    method delete (Int $w?) {
+        return $self->send_message(
+            DelReq => {
+                bucket => $self->bucket,
+                key => $self->key,
+                rw => $w || $self->w,
+            }
+        );
     }
 }

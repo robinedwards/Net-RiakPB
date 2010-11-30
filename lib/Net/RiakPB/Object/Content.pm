@@ -3,10 +3,9 @@ use MooseX::Declare;
 
 class Net::RiakPB::Object::Content {
     use Data::Dumper;
-    use Net::RiakPB::Message;
     use Net::RiakPB::Types qw/Link Pair/;
     use MooseX::Types::Moose qw/Str ArrayRef Any Int Ref/;
-    use Perl6::Junction 'any';
+    use Perl6::Junction 'all';
     use JSON::XS;
 
     has value => (
@@ -66,31 +65,29 @@ class Net::RiakPB::Object::Content {
     my @attributes = qw/usermeta last_mod_usecs last_mod 
         links vtag content_encoding charset content_type value/;
 
-    method decode (Str $encoded_message) {
-        my $message = Net::RiakPB::Message->decode(
-            Content => $encoded_message
-        );
-
+    method decode (Object $message) {
         die "no message returned" unless $message->isa('RpbContent');
 
-        for my $attr ( grep { $_ ne any(qw/links usermeta value/) } 
+        for my $attr ( grep { $_ ne all(qw/links usermeta value/) } 
             @attributes ) {
-                $self->$attr($message->$attr);
+                $self->$attr($message->$attr) if defined $message->$attr;
         }
 
-        $self->${"decode_$_"}($message->$_) for (qw/links usermeta value/);
+        $self->${\"decode_$_"}($message->$_) for (qw/value/);
+
+        return $self;
     }
 
     method decode_links {
-        warn Dumper @_;
+        die "todo";
     }
 
     method decode_usermeta {
-        warn Dumper @_;
+        die "todo";
     }
 
     method decode_value (Str $value){
-        if ( $self->content_type eq 'application_json' ) {
+        if ( $self->content_type eq 'application/json' ) {
             $self->value( decode_json($value));
         }
         else {
@@ -101,7 +98,7 @@ class Net::RiakPB::Object::Content {
     method encode {
         my $params = { 
             map { $_ => $self->$_ } 
-            grep { $_ ne any(qw/links usermeta value/) } @attributes
+            grep { $_ ne all(qw/links usermeta value/) } @attributes
         };
 
         $params->{$_} = $self->${\"encode_$_"} for qw/links usermeta value/;

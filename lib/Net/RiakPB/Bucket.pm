@@ -4,6 +4,7 @@ use MooseX::Declare;
 class Net::RiakPB::Bucket {
     use MooseX::Types::Moose 'Str';
     use MooseX::MultiMethods;
+    use Data::Dumper;
     use Net::RiakPB::Types qw/Client Content/;
     use Net::RiakPB::Object;
 
@@ -58,20 +59,55 @@ class Net::RiakPB::Bucket {
         )->store;
     }
 
-    method all_keys {
+    multi method get_keys {
+        my $keys = [];
 
+        $self->send_message(
+            ListKeysReq => {
+                bucket => $self->name,
+            },
+
+            sub {
+                if (defined $_[0]->keys) {
+                    push @$keys, @{$_[0]->keys};  
+                } 
+            }
+        );
+
+        return @$keys;
     }
+
+    multi method get_keys(HashRef $param) {
+        my $cb = $param->{cb};
+
+        my $count = 0;
+
+        $self->send_message(
+            ListKeysReq => {
+                bucket => $self->name,
+            },
+
+            sub { 
+                if (defined $_[0]->keys) {
+                    $cb->($_) for (@{$_[0]->keys});
+                }
+            }
+        );
+    }
+
 
     # TODO type checking on set value structure
     method set_properties (HashRef $prop) {
         return $self->send_message(
             SetBucketReq => {
                 bucket => $self->name,
-                props => $self->new_message(
-                    BucketProps => $prop
-                ),
+                props => $prop
             }
         );
+    }
+
+    method n_val (Int $n) {
+        $self->set_properties({n_val => $n});
     }
 
     method get_properties {

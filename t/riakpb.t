@@ -13,9 +13,9 @@ my $client = Net::RiakPB->new(
 
 isa_ok $client, 'Net::RiakPB';
 
-ok ref($client->all_buckets) eq 'ARRAY', "returns array ref";
+ok $client->is_alive, "can ping";
 
-ok $client->ping, "can ping";
+ok ref($client->all_buckets) eq 'ARRAY', "returns array ref";
 
 my $resp = $client->server_info;
 

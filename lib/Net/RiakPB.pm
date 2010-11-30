@@ -36,7 +36,7 @@ class Net::RiakPB {
         return $resp->buckets;
     }
 
-    method ping {
+    method is_alive {
         return $self->send_message('PingReq');
     }
 
