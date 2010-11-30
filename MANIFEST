@@ -1,8 +1,11 @@
+lib/Net/RiakPB/Object.pm
+lib/Net/RiakPB/Quorum.pm
 lib/Net/RiakPB/Message.pm
 lib/Net/RiakPB/Types.pm
 lib/Net/RiakPB/Message/Code.pm
 lib/Net/RiakPB/Message/Protocol.pm
 lib/Net/RiakPB/Message/Builder.pm
 lib/Net/RiakPB/Client.pm
+lib/Net/RiakPB/Object/Content.pm
 lib/Net/RiakPB/Bucket.pm
 lib/Net/RiakPB.pm

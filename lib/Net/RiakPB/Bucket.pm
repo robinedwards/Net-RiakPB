@@ -2,9 +2,10 @@ use 5.008;
 use MooseX::Declare;
 
 class Net::RiakPB::Bucket {
-    use Net::RiakPB::Types 'Client';
     use MooseX::Types::Moose 'Str';
-    use Data::Dumper;
+    use MooseX::MultiMethods;
+    use Net::RiakPB::Types qw/Client Content/;
+    use Net::RiakPB::Object;
 
     has name => (
         is => 'ro',
@@ -21,19 +22,43 @@ class Net::RiakPB::Bucket {
     
     with 'Net::RiakPB::Message::Builder';
 
-    method new_object(Str $key, HashRef $obj) {
-
+    method delete_object(Str $key, Int $w?) {
+        return $self->send_message(
+            DelReq => {
+                bucket => $self->name,
+                key => $key,
+                rw => $w || $self->w,
+            }
+        );
     }
 
-    method get (Str $key) {
+    method get (Str $key, Int $r?) {
+        return Net::RiakPB::Object->new(
+            key => $key,
+            client => $self->client,
+            bucket => $self->name,
+        )->load;
+    }
 
+    multi method new_object (Str $key, HashRef $data) {
+        return Net::RiakPB::Object->new(
+            key => $key,
+            bucket => $self->name,
+            content => { value => $data },
+            client => $self->client,
+        )->store;
+    }
+
+    multi method new_object (Str $key, Content $content) {
+        return Net::RiakPB::Object->new(
+            key => $key,
+            bucket => $self->bucket,
+            content => $content,
+            client => $self->client,
+        )->store;
     }
 
     method all_keys {
-
-    }
-
-    method delete {
 
     }
 

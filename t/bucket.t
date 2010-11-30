@@ -17,6 +17,15 @@ my $bucket = $client->bucket("TEST_$$\_foo");
 
 isa_ok $bucket, 'Net::RiakPB::Bucket';
 
+eval { my $bar = $bucket->get('bar') } ;
+
+ok $@ =~ /is empty/, 'bucket is empty';
+
+ok $bucket->delete_object('bar'), 'deleted bar';
+
+diag "new obj";
+my $bob = $bucket->new_object('bob', {'name' => 'bob', age => 23 });
+
 ok $bucket->set_properties({
         n_val => 2,
         allow_mult => 1,

@@ -47,13 +47,19 @@ class Net::RiakPB::Message {
     }
 
     method _build_request {
-        my $body = $self->message_type->can('encode') ?
-            $self->message_type->encode($self->params) : '';
-
         return $self->_pack_request(
             $self->request_code,
-            $body
+            $self->encode
         );
+    }
+
+    method encode {
+        return $self->message_type->can('encode') ?
+            $self->message_type->encode($self->params) : '';
+    }
+
+    method decode (ClassName $class: Str $type, Str $raw_content) {
+        return 'Rpb'.$type->decode($raw_content);
     }
 
     # inflate to error response class
@@ -66,8 +72,6 @@ class Net::RiakPB::Message {
         my ($code, $resp) = $self->_unpack_response;
 
         my $expected_code = EXPECTED_RESP($self->request_code);
-
-        warn "resp_code = $code";
         
         if ($expected_code != $code) {
             # TODO throw object
@@ -86,6 +90,7 @@ class Net::RiakPB::Message {
         my $len = length $h;
         return pack('N',$len).$h;
     }
+
 
     method _unpack_response {
         my ($len, $code, $msg);
